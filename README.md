@@ -1,89 +1,96 @@
-# 视频二创 Agent (Video Re-creation Agent)
+# 视频二创 Agent
 
-[English](README_EN.md) | 中文
-
-🎬 AI 驱动的视频二创工作流，一键生成短视频稿子
-
-## 功能特性
-
-- 🎬 **视频语音转录** - 本地 Whisper 模型，95% 准确率
-- 📝 **AI 内容分析** - 提取重点 + 热门话题建议
-- ✍️ **二创改写** - 生成 3 个不同表达方式的版本
-- 🎯 **平台适配优化** - 抖音/小红书/B 站规则适配
-- 📊 **AI 审核评分** - 多维度评估 + 修改建议
-- 📋 **逐字稿生成** - 包含语气、分镜、重点表现方式
-- 🏷️ **标题/标签建议** - 10 个标题变体 + 热门标签推荐
+🎬 AI 驱动的视频二创工作流
 
 ## 快速开始
 
-### 前置要求
-
-- Python 3.10+
-- Node.js 18+ (前端)
-- 8GB+ RAM (Whisper 本地运行)
-
-### 安装步骤
+### 1. 安装依赖
 
 ```bash
-# 1. 克隆仓库
-git clone https://github.com/q17603008535-netizen/videos_create.git
-cd videos_create
-
-# 2. 配置环境变量
-cp .env.example .env
-# 编辑 .env 填入 API key
-
-# 3. 安装后端依赖
 pip install -r backend/requirements.txt
-
-# 4. 安装前端依赖
-cd frontend
-npm install
-
-# 5. 启动服务
-python backend/main.py
-# 访问 http://localhost:8000
 ```
 
-## 技术栈
+### 2. 配置 API Key
 
-| 层级 | 技术 |
-|------|------|
-| 前端 | Vue 3 + Vite + TailwindCSS |
-| 后端 | Python FastAPI |
-| 数据库 | SQLite |
-| 语音转录 | Whisper (medium) |
-| AI 模型 | Qwen3.5 + DeepSeek V3.2 |
+复制 `.env.example` 为 `.env` 并填入你的 API key：
+
+```bash
+cp .env.example .env
+```
+
+编辑 `.env`:
+```
+QWEN_API_KEY=sk-your-qwen-key
+DEEPSEEK_API_KEY=sk-your-deepseek-key
+```
+
+### 3. 添加视频
+
+将视频文件放入 `data/videos/` 文件夹：
+
+```bash
+mkdir -p data/videos
+cp your_video.mp4 data/videos/
+```
+
+### 4. 启动服务
+
+```bash
+python backend/main.py
+```
+
+访问 http://127.0.0.1:8000/
+
+### 5. 处理视频
+
+**方式 1: 使用前端界面**
+1. 打开 http://127.0.0.1:8000/
+2. 点击视频旁边的"处理"按钮
+3. 等待处理完成
+4. 查看生成的脚本
+
+**方式 2: 使用命令行**
+```bash
+python backend/pipeline.py your_video.mp4
+```
+
+### 输出文件
+
+处理完成后，文件保存在 `data/outputs/`:
+
+```
+data/outputs/
+├── your_video_script.md       # Markdown 逐字稿
+└── your_video_result.json     # 完整结果
+```
 
 ## 完整 SOP 流程
 
-```
-视频上传 → 语音转录 → 内容分析 → 二创改写 (3 版本) → 
-平台适配 → AI 审核 → 人工审核 → 逐字稿 → 标题/标签 → 输出
-```
+1. 🎤 **语音转录** - Whisper medium 模型 (95% 准确率)
+2. 🔍 **内容分析** - Qwen 提取重点和标签
+3. ✍️ **二创改写** - DeepSeek 生成 3 个不同风格版本
+4. 📊 **AI 审核** - Qwen 多维度评分（原创度/合规性/吸引力）
+5. 📝 **逐字稿生成** - Markdown 格式，包含语气和分镜建议
+6. 🏷️ **标题标签** - 10 个标题变体 + 热门标签
 
-## 项目结构
+## 技术栈
 
-```
-videos_create/
-├── backend/           # 后端代码
-├── frontend/          # 前端代码
-├── docs/              # 文档
-├── data/              # 数据目录 (运行时创建)
-├── scripts/           # 辅助脚本
-└── tests/             # 测试
-```
+- **前端**: HTML + Alpine.js + TailwindCSS
+- **后端**: Python FastAPI
+- **转录**: Whisper medium (本地)
+- **AI**: Qwen3.5 + DeepSeek V3.2
 
-## 开发计划
+## 常见问题
 
-- [x] v0.1 MVP - 本地单人使用
-- [ ] v0.2 - 多用户 + Cloudflare 部署
-- [ ] v0.3 - 产品化 (付费功能)
+### Q: 需要 GPU 吗？
+A: 不需要。Whisper medium 在 CPU 上运行良好（约 5-10 分钟/视频）。
 
-## 许可证
+### Q: API 费用多少？
+A: 单个视频（10 分钟）约 ¥0.5-1 元（Qwen + DeepSeek）。
+
+### Q: 支持哪些视频格式？
+A: MP4, MOV, MKV, AVI。
+
+## License
 
 MIT License
-
-## 贡献
-
-欢迎提交 Issue 和 Pull Request!

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, SecretStr
 from datetime import datetime
 from typing import Optional
 
@@ -8,7 +8,7 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
-    password: str
+    password: SecretStr
 
 
 class UserResponse(UserBase):
@@ -21,10 +21,10 @@ class UserResponse(UserBase):
 
 class LoginRequest(BaseModel):
     username: str
-    password: str
+    password: SecretStr
 
 
 class LoginResponse(BaseModel):
-    access_token: str
-    token_type: str
-    user: UserResponse
+    success: bool
+    message: str
+    user: Optional[UserResponse] = None

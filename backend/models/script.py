@@ -1,5 +1,6 @@
+from typing import TYPE_CHECKING, Optional
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 from database import Base
 
@@ -7,14 +8,17 @@ from database import Base
 class Script(Base):
     __tablename__ = "scripts"
 
-    id = Column(Integer, primary_key=True, index=True)
-    video_id = Column(Integer, ForeignKey("videos.id"), nullable=False)
-    version = Column(Integer, default=1)
-    content = Column(Text, nullable=False)
-    titles = Column(String)
-    tags = Column(String)
-    suggestions = Column(String)
-    status = Column(String, default="draft")
-    created_at = Column(DateTime, default=datetime.utcnow)
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    video_id: Mapped[int] = mapped_column(ForeignKey("videos.id"), nullable=False)
+    version: Mapped[int] = mapped_column(default=1)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    titles: Mapped[Optional[str]] = mapped_column(default=None)
+    tags: Mapped[Optional[str]] = mapped_column(default=None)
+    suggestions: Mapped[Optional[str]] = mapped_column(default=None)
+    status: Mapped[str] = mapped_column(default="draft")
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
-    video = relationship("Video", back_populates="scripts")
+    if TYPE_CHECKING:
+        video: "Video"
+    else:
+        video = relationship("Video", back_populates="scripts")

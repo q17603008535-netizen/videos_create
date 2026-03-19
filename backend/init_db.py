@@ -1,6 +1,6 @@
-from database import engine, Base, SessionLocal
-from config import settings
-from models.user import User
+from backend.database import engine, Base, SessionLocal
+from backend.config import settings
+from backend.models.user import User
 import bcrypt
 
 

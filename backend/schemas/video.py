@@ -5,6 +5,7 @@ from typing import Optional, List
 
 class VideoBase(BaseModel):
     original_filename: str
+    # Duration in seconds
     duration: Optional[int] = None
 
 

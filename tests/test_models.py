@@ -2,9 +2,9 @@ import pytest
 from datetime import datetime
 from sqlalchemy.orm import Session
 
-from models.user import User
-from models.video import Video
-from models.script import Script
+from backend.models.user import User
+from backend.models.video import Video
+from backend.models.script import Script
 
 
 class TestUserModel:

@@ -12,9 +12,9 @@ sys.path.insert(0, os.path.abspath(root_path))
 @pytest.fixture(scope="function")
 def db_session():
     from database import SessionLocal, engine, Base
-    from models.user import User
-    from models.video import Video
-    from models.script import Script
+    from backend.models.user import User
+    from backend.models.video import Video
+    from backend.models.script import Script
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>视频二创 Agent</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div x-data="app()" x-init="init()" class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">🎬 视频二创 Agent</h1>
+            <p class="text-gray-600">AI 驱动的视频二创工作流</p>
+        </header>
+
+        <!-- Video List -->
+        <div class="bg-white rounded-lg shadow mb-8">
+            <div class="p-4 border-b">
+                <h2 class="text-xl font-semibold">📁 视频列表</h2>
+            </div>
+            <div class="p-4">
+                <div x-show="videos.length === 0" class="text-center py-8 text-gray-500">
+                    暂无视频，请将视频文件放入 data/videos/ 文件夹
+                </div>
+                <div class="space-y-4">
+                    <template x-for="video in videos" :key="video.id">
+                        <div class="flex justify-between items-center p-4 border rounded-lg hover:bg-gray-50">
+                            <div>
+                                <p class="font-medium" x-text="video.filename"></p>
+                                <p class="text-sm text-gray-500" x-text="video.size_mb + ' MB'"></p>
+                            </div>
+                            <button 
+                                @click="processVideo(video)" 
+                                :disabled="processing"
+                                class="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300"
+                            >
+                                <span x-show="!processing">处理</span>
+                                <span x-show="processing">处理中...</span>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress -->
+        <div x-show="processing" class="bg-white rounded-lg shadow p-8">
+            <h2 class="text-xl font-semibold mb-4">⏳ 处理进度</h2>
+            <div class="space-y-2">
+                <template x-for="(step, index) in steps" :key="index">
+                    <div class="flex items-center" :class="step.done ? 'text-green-600' : (step.current ? 'text-blue-600' : 'text-gray-400')">
+                        <span x-text="step.done ? '✅' : (step.current ? '👉' : '⬜')"></span>
+                        <span class="ml-2" x-text="step.name"></span>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Result -->
+        <div x-show="result" class="bg-white rounded-lg shadow p-8">
+            <h2 class="text-xl font-semibold mb-4">✅ 处理完成</h2>
+            <div class="space-y-4">
+                <p><strong>最佳版本:</strong> <span x-text="result?.best_version"></span></p>
+                <p><strong>脚本文件:</strong> <a :href="result?.script_path" class="text-blue-500" x-text="result?.script_path"></a></p>
+                <div class="mt-4">
+                    <h3 class="font-semibold mb-2">版本评分:</h3>
+                    <div class="space-y-2">
+                        <template x-for="(version, i) in result?.versions" :key="i">
+                            <div class="p-3 border rounded" :class="i + 1 === result?.best_version ? 'bg-green-50 border-green-500' : ''">
+                                <span x-text="'版本 ' + (i + 1) + ' - ' + version.style"></span>
+                                <span class="ml-4 font-bold" x-text="version.review.originality_score + '分'"></span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function app() {
+            return {
+                videos: [],
+                processing: false,
+                result: null,
+                steps: [
+                    { name: '转录', done: false, current: false },
+                    { name: '内容分析', done: false, current: false },
+                    { name: '改写 (3 版本)', done: false, current: false },
+                    { name: 'AI 审核', done: false, current: false },
+                    { name: '生成脚本', done: false, current: false }
+                ],
+
+                async init() {
+                    await this.loadVideos();
+                },
+
+                async loadVideos() {
+                    const response = await fetch('/api/videos');
+                    const data = await response.json();
+                    this.videos = data;
+                },
+
+                async processVideo(video) {
+                    this.processing = true;
+                    this.result = null;
+                    this.resetSteps();
+
+                    try {
+                        const response = await fetch('/api/process', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ video: video.filename })
+                        });
+                        const result = await response.json();
+                        this.result = result;
+                    } catch (error) {
+                        alert('处理失败：' + error.message);
+                    } finally {
+                        this.processing = false;
+                    }
+                },
+
+                resetSteps() {
+                    this.steps.forEach(step => {
+                        step.done = false;
+                        step.current = false;
+                    });
+                }
+            }
+        }
+    </script>
+</body>
+</html>
