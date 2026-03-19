@@ -1,10 +1,27 @@
-from backend.database import engine, Base
+from backend.database import engine, Base, get_db
 from backend.config import settings
-from passlib.hash import bcrypt
+from backend.models.user import User
+import bcrypt
 
 
 def init_db():
     Base.metadata.create_all(bind=engine)
+    db = next(get_db())
+    try:
+        admin = db.query(User).filter(User.username == settings.ADMIN_USERNAME).first()
+        if not admin:
+            admin = User(
+                username=settings.ADMIN_USERNAME,
+                password_hash=bcrypt.hashpw(settings.ADMIN_PASSWORD.encode(), bcrypt.gensalt()).decode(),
+                role="admin"
+            )
+            db.add(admin)
+            db.commit()
+            print("Admin user created successfully!")
+        else:
+            print("Admin user already exists.")
+    finally:
+        db.close()
     print("Database tables created successfully!")
 
 
